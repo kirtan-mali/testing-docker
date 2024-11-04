@@ -54,6 +54,11 @@ source env/bin/activate || {
 log_message "Python version and location:"
 which python3
 python3 --version
+pip3 --version
+
+# Upgrade pip first
+log_message "Upgrading pip..."
+python3 -m pip install --upgrade pip
 
 # Change to sd-scripts directory and install its requirements
 log_message "Installing sd-scripts requirements..."
@@ -64,13 +69,20 @@ if [ -d "sd-scripts" ]; then
     }
     
     log_message "Current directory: $(pwd)"
+    log_message "Contents of sd-scripts directory:"
+    ls -la
     
     if [ -f "requirements.txt" ]; then
+        log_message "Contents of requirements.txt:"
+        cat requirements.txt
+        
         log_message "Installing sd-scripts requirements..."
-        pip3 install --no-cache-dir -r requirements.txt || {
-            log_message "ERROR: Failed to install sd-scripts requirements"
+        # Create a log file for pip installation
+        if ! pip3 install --no-cache-dir -r requirements.txt --verbose > pip_install.log 2>&1; then
+            log_message "ERROR: Failed to install sd-scripts requirements. Installation log:"
+            cat pip_install.log
             exit 1
-        }
+        fi
     else
         log_message "ERROR: requirements.txt not found in sd-scripts directory"
         exit 1
@@ -85,6 +97,10 @@ else
     log_message "ERROR: sd-scripts directory not found"
     exit 1
 fi
+
+# List installed packages
+log_message "Installed Python packages:"
+pip3 list
 
 # Run the handler.py
 log_message "Starting handler.py..."
