@@ -8,7 +8,7 @@ WORKDIR /Test
 RUN pip install runpod
 
 # Copy the start.sh script into the container and make it executable
-COPY start.sh /run.sh
+COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
 # Set the entrypoint to run the start.sh script
