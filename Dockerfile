@@ -1,3 +1,4 @@
+# Dockerfile
 FROM nvidia/cuda:12.2.0-runtime-ubuntu20.04
 
 # Install system packages
@@ -22,6 +23,11 @@ COPY . /app
 
 # Set the working directory
 WORKDIR /app
+
+# Create virtual environment and install requirements
+RUN python3 -m venv /app/env && \
+    . /app/env/bin/activate && \
+    pip install -r requirements.txt
 
 # Ensure run.sh has execution permissions
 RUN chmod +x run.sh
