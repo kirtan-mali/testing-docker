@@ -13,9 +13,9 @@ else
 fi
 
 # Change to the application directory
-cd /workspace/fluxgym
+cd /fluxgym
 source env/bin/activate
 
 # Run the Python application
 echo "Starting the FluxGym Python application..."
-python3 -u /workspace/fluxgym/handler.py
+python3 -u /fluxgym/handler.py
