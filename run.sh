@@ -17,4 +17,4 @@ cd /app/fluxgym
 
 # Run the Python application
 echo "Starting the FluxGym Python application..."
-exec python3 ./handler.py
+exec python3 -u /workspace/fluxgym/handler.py
