@@ -1,9 +1,8 @@
-from python:3.11.1-buster
+# Base image
+FROM python:3.11.1-buster
 
+# Create a symlink for the RunPod network volume
 RUN ln -s /runpod-volume /workspace
-
-# Include Python
-from python:3.11.1-buster
 
 # Define your working directory
 WORKDIR /Test
@@ -11,8 +10,8 @@ WORKDIR /Test
 # Install runpod
 RUN pip install runpod
 
-# Add your file
-ADD whatever.py .
+# Copy your Python file into the container
+COPY whatever.py .
 
-# Call your file when your container starts
-CMD [ "python", "-u", "/whatever.py" ]
+# Set the command to run your script when the container starts
+CMD [ "python", "-u", "whatever.py" ]
