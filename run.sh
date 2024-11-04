@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-echo "Worker Initiated"
+echo "Starting initialization..."
 
-# Check if /runpod-volume exists and create a symlink to /workspace
+# Check if the RunPod volume exists and create a symlink
 if [ -d "/runpod-volume" ]; then
     echo "Symlinking /runpod-volume to /workspace"
     rm -rf /workspace && \
@@ -12,6 +12,9 @@ else
     exit 1
 fi
 
-echo "Starting RunPod Handler"
-# Run your Python script from /Test or the appropriate path
-python3 -u /runpod-volume/Test/whatever.py
+# Change to the application directory
+cd /app/fluxgym
+
+# Run the Python application
+echo "Starting the FluxGym Python application..."
+exec python3 ./handler.py
