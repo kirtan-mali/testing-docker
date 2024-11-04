@@ -11,7 +11,7 @@ WORKDIR /Test
 RUN pip install runpod
 
 # Copy your Python file into the container
-COPY whatever.py .
+ADD whatever.py .
 
 # Set the command to run your script when the container starts
-CMD [ "python", "-u", "whatever.py" ]
+CMD [ "python", "-u", "/Test/whatever.py" ]
