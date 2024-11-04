@@ -10,6 +10,9 @@ log_message() {
 
 # Start initialization
 log_message "Starting initialization..."
+log_message "Current user and permissions:"
+id
+ls -l $(which bash)
 
 # Check and list runpod volume
 if [ -d "/runpod-volume" ]; then
@@ -31,6 +34,14 @@ cd /workspace/fluxgym || {
 }
 
 log_message "Current directory: $(pwd)"
+log_message "Env directory permissions:"
+ls -la env/
+ls -la env/bin/
+
+# Fix permissions if needed
+log_message "Fixing permissions..."
+chmod -R +x env/bin/
+chmod +x env/bin/activate
 
 # Check for required files/directories
 if [ ! -f "handler.py" ]; then
@@ -43,22 +54,28 @@ if [ ! -d "env" ]; then
     exit 1
 fi
 
-# Activate virtual environment
+# Try activating with bash explicitly
 log_message "Activating virtual environment..."
-source env/bin/activate || {
-    log_message "ERROR: Failed to activate virtual environment"
-    exit 1
-}
+if ! bash -c "source env/bin/activate"; then
+    log_message "ERROR: Failed to activate environment with bash"
+    log_message "Trying alternative activation method..."
+    
+    # Alternative activation method
+    export VIRTUAL_ENV="$(pwd)/env"
+    export PATH="$VIRTUAL_ENV/bin:$PATH"
+    unset PYTHON_HOME
+    
+    # Verify activation
+    if [[ "$PATH" != *"/env/bin"* ]]; then
+        log_message "ERROR: Failed to activate environment using PATH method"
+        exit 1
+    fi
+fi
 
 # Verify Python environment
 log_message "Python version and location:"
 which python3
 python3 --version
-pip3 --version
-
-# Upgrade pip first
-log_message "Upgrading pip..."
-python3 -m pip install --upgrade pip
 
 # Change to sd-scripts directory and install its requirements
 log_message "Installing sd-scripts requirements..."
@@ -69,20 +86,13 @@ if [ -d "sd-scripts" ]; then
     }
     
     log_message "Current directory: $(pwd)"
-    log_message "Contents of sd-scripts directory:"
-    ls -la
     
     if [ -f "requirements.txt" ]; then
-        log_message "Contents of requirements.txt:"
-        cat requirements.txt
-        
         log_message "Installing sd-scripts requirements..."
-        # Create a log file for pip installation
-        if ! pip3 install --no-cache-dir -r requirements.txt --verbose > pip_install.log 2>&1; then
-            log_message "ERROR: Failed to install sd-scripts requirements. Installation log:"
-            cat pip_install.log
+        pip3 install --no-cache-dir -r requirements.txt || {
+            log_message "ERROR: Failed to install sd-scripts requirements"
             exit 1
-        fi
+        }
     else
         log_message "ERROR: requirements.txt not found in sd-scripts directory"
         exit 1
@@ -97,10 +107,6 @@ else
     log_message "ERROR: sd-scripts directory not found"
     exit 1
 fi
-
-# List installed packages
-log_message "Installed Python packages:"
-pip3 list
 
 # Run the handler.py
 log_message "Starting handler.py..."
