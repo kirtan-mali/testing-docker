@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.2.2-base-ubuntu22.04
+FROM nvidia/cuda:12.2.0-runtime-ubuntu20.04
 
 # Install system packages
 RUN apt-get update && \
