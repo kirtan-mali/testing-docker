@@ -18,14 +18,9 @@ RUN pip3 install --upgrade pip
 # Install PyTorch and other Python dependencies
 RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-# Copy the content of the repo to the container
-COPY . /app
+# Copy run.sh from the repository
+COPY run.sh /run.sh
+RUN chmod +x /run.sh
 
-# Set the working directory
-WORKDIR /app
-
-# Ensure run.sh has execution permissions
-RUN chmod +x run.sh
-
-# Set the entrypoint to run.sh
-ENTRYPOINT ["/app/run.sh"]
+# Set the entrypoint
+ENTRYPOINT ["/run.sh"]
