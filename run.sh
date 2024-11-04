@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 
 # Enable error handling
 set -e
@@ -8,22 +7,8 @@ log_message() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
-# Function to check directory/file existence
-check_path() {
-    if [ -e "$1" ]; then
-        log_message "✓ Found: $1"
-    else
-        log_message "✗ Not found: $1"
-        return 1
-    fi
-}
-
 # Start initialization
 log_message "Starting initialization..."
-
-# List contents of root directory
-log_message "Contents of root directory (/):"
-ls -la / | sed 's/^/    /'
 
 # Check and list runpod volume
 if [ -d "/runpod-volume" ]; then
@@ -38,37 +23,38 @@ else
     exit 1
 fi
 
-# List workspace contents after symlink
-log_message "Contents of /workspace after symlink:"
-ls -la /workspace | sed 's/^/    /'
-
-# Check for fluxgym directory
-if ! check_path "/workspace/fluxgym"; then
+# Check fluxgym directory
+if [ ! -d "/workspace/fluxgym" ]; then
     log_message "ERROR: /workspace/fluxgym directory not found"
     exit 1
 fi
 
-# List contents of fluxgym directory
-log_message "Contents of /workspace/fluxgym:"
-ls -la /workspace/fluxgym | sed 's/^/    /'
+cd /workspace/fluxgym
+log_message "Changed directory to /workspace/fluxgym"
 
-# Check for handler.py
-if ! check_path "/workspace/fluxgym/handler.py"; then
-    log_message "ERROR: handler.py not found in /workspace/fluxgym/"
+# Check handler.py
+if [ ! -f "handler.py" ]; then
+    log_message "ERROR: handler.py not found"
     exit 1
 fi
 
-# Check for virtual environment
-if ! check_path "/app/env"; then
-    log_message "ERROR: Virtual environment not found at /app/env"
-    exit 1
+# Create and setup virtual environment
+log_message "Setting up Python environment..."
+if [ ! -d "env" ]; then
+    log_message "Creating virtual environment..."
+    python3 -m venv env
 fi
 
-# Try to activate virtual environment
+# Activate virtual environment
 log_message "Activating virtual environment..."
-if ! source /app/env/bin/activate; then
-    log_message "ERROR: Failed to activate virtual environment"
-    exit 1
+source env/bin/activate
+
+# Install requirements if present
+if [ -f "requirements.txt" ]; then
+    log_message "Installing requirements from requirements.txt..."
+    pip install -r requirements.txt
+else
+    log_message "WARNING: requirements.txt not found"
 fi
 
 # Verify Python environment
@@ -76,16 +62,23 @@ log_message "Python version and location:"
 which python3
 python3 --version
 
-# List installed Python packages
+# List installed packages
 log_message "Installed Python packages:"
 pip list | sed 's/^/    /'
 
-# Run the Python application
-log_message "Starting the FluxGym Python application..."
-if python3 -u /workspace/fluxgym/handler.py; then
-    log_message "Application exited successfully"
-else
-    exit_code=$?
-    log_message "ERROR: Application exited with code ${exit_code}"
+# Run the handler.py
+log_message "Starting handler.py..."
+python3 -u handler.py
+
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+    log_message "ERROR: handler.py exited with code ${exit_code}"
+    # Print the last few lines of any error logs if they exist
+    if [ -f "error.log" ]; then
+        log_message "Last few lines of error.log:"
+        tail -n 20 error.log
+    fi
     exit ${exit_code}
 fi
+
+log_message "Handler completed successfully"
