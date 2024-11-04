@@ -6,7 +6,7 @@ RUN ln -s /runpod-volume /workspace
 from python:3.11.1-buster
 
 # Define your working directory
-WORKDIR /
+WORKDIR /Test
 
 # Install runpod
 RUN pip install runpod
