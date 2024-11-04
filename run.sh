@@ -108,6 +108,18 @@ else
     exit 1
 fi
 
+log_message "Installing fluxgym requirements..."
+if [ -f "requirements.txt" ]; then
+        log_message "Installing fluxgym requirements..."
+        pip3 install --no-cache-dir -r requirements.txt || {
+            log_message "ERROR: Failed to install fluxgym requirements"
+            exit 1
+        }
+    else
+        log_message "ERROR: requirements.txt not found in fluxgym directory"
+        exit 1
+    fi
+
 # Run the handler.py
 log_message "Starting handler.py..."
 python3 -u handler.py
