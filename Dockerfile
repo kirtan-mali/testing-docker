@@ -37,11 +37,15 @@ RUN chown -R appuser:appuser /app
 RUN rm -r ./sd-scripts
 RUN rm ./requirements.txt
 
-#Run application as non-root
+# Run application as non-root
 USER appuser
 
 # Copy fluxgym application code
 COPY . ./fluxgym
+
+# Copy the start.sh script and make it executable
+COPY run.sh /run.sh
+RUN chmod +x /run.sh
 
 EXPOSE 7860
 
@@ -49,5 +53,5 @@ ENV GRADIO_SERVER_NAME="0.0.0.0"
 
 WORKDIR /app/fluxgym
 
-# Run fluxgym Python application
-CMD ["python3", "./handler.py"]
+# Set the entrypoint to use the start.sh script
+ENTRYPOINT ["/run.sh"]
