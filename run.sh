@@ -34,36 +34,42 @@ cd /workspace/fluxgym || {
 }
 
 log_message "Current directory: $(pwd)"
+log_message "Env directory permissions:"
+ls -la env/
+ls -la env/bin/
 
-# Check for existence of virtual environment
-if [ -d "env" ]; then
-    log_message "Found virtual environment. Checking permissions:"
-    ls -la env/
-    ls -la env/bin/
+# Fix permissions if needed
+log_message "Fixing permissions..."
+chmod -R +x env/bin/
+chmod +x env/bin/activate
 
-    # Fix permissions if needed
-    log_message "Fixing permissions..."
-    chmod -R +x env/bin/
-    chmod +x env/bin/activate
+# Check for required files/directories
+if [ ! -f "handler.py" ]; then
+    log_message "ERROR: handler.py not found in $(pwd)"
+    exit 1
+fi
 
-    # Activate virtual environment
-    log_message "Activating virtual environment..."
-    source env/bin/activate || {
-        log_message "Failed to activate with source, trying alternative method"
-        export VIRTUAL_ENV="$(pwd)/env"
-        export PATH="$VIRTUAL_ENV/bin:$PATH"
-        unset PYTHON_HOME
-    }
-else
-    log_message "Creating new virtual environment..."
-    python3 -m venv env
-    chmod -R +x env/bin/
-    source env/bin/activate || {
-        log_message "Failed to activate with source, trying alternative method"
-        export VIRTUAL_ENV="$(pwd)/env"
-        export PATH="$VIRTUAL_ENV/bin:$PATH"
-        unset PYTHON_HOME
-    }
+if [ ! -d "env" ]; then
+    log_message "ERROR: env directory not found in $(pwd)"
+    exit 1
+fi
+
+# Try activating with bash explicitly
+log_message "Activating virtual environment..."
+if ! bash -c "source env/bin/activate"; then
+    log_message "ERROR: Failed to activate environment with bash"
+    log_message "Trying alternative activation method..."
+    
+    # Alternative activation method
+    export VIRTUAL_ENV="$(pwd)/env"
+    export PATH="$VIRTUAL_ENV/bin:$PATH"
+    unset PYTHON_HOME
+    
+    # Verify activation
+    if [[ "$PATH" != *"/env/bin"* ]]; then
+        log_message "ERROR: Failed to activate environment using PATH method"
+        exit 1
+    fi
 fi
 
 # Verify Python environment
@@ -71,28 +77,25 @@ log_message "Python version and location:"
 which python3
 python3 --version
 
-# Install triton and bitsandbytes explicitly
-log_message "Installing critical dependencies..."
-pip install --no-cache-dir torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorch.org/whl/cu121
-pip install --no-cache-dir triton==2.1.0
-pip install --no-cache-dir bitsandbytes==0.41.1
-pip install --no-cache-dir diffusers==0.25.1 transformers==4.35.2 accelerate==0.25.0 safetensors==0.4.1
-
-# Check for sd-scripts and install requirements
+# Change to sd-scripts directory and install its requirements
+log_message "Installing sd-scripts requirements..."
 if [ -d "sd-scripts" ]; then
-    log_message "Found sd-scripts directory. Installing requirements..."
     cd sd-scripts || {
         log_message "ERROR: Could not change to sd-scripts directory"
         exit 1
     }
     
+    log_message "Current directory: $(pwd)"
+    
     if [ -f "requirements.txt" ]; then
         log_message "Installing sd-scripts requirements..."
-        pip install --no-cache-dir -r requirements.txt || {
-            log_message "WARNING: Some sd-scripts requirements failed to install. Continuing anyway."
+        pip3 install --no-cache-dir -r requirements.txt || {
+            log_message "ERROR: Failed to install sd-scripts requirements"
+            exit 1
         }
     else
-        log_message "WARNING: requirements.txt not found in sd-scripts directory"
+        log_message "ERROR: requirements.txt not found in sd-scripts directory"
+        exit 1
     fi
     
     # Return to fluxgym directory
@@ -101,50 +104,24 @@ if [ -d "sd-scripts" ]; then
         exit 1
     }
 else
-    log_message "ERROR: sd-scripts directory not found. Attempting to clone..."
-    git clone https://github.com/kohya-ss/sd-scripts.git
-    cd sd-scripts || {
-        log_message "ERROR: Could not change to sd-scripts directory after cloning"
-        exit 1
-    }
-    
-    if [ -f "requirements.txt" ]; then
-        log_message "Installing sd-scripts requirements..."
-        pip install --no-cache-dir -r requirements.txt || {
-            log_message "WARNING: Some sd-scripts requirements failed to install. Continuing anyway."
-        }
-    fi
-    
-    cd .. || {
-        log_message "ERROR: Could not return to fluxgym directory"
-        exit 1
-    }
+    log_message "ERROR: sd-scripts directory not found"
+    exit 1
 fi
 
-# Install fluxgym requirements
 log_message "Installing fluxgym requirements..."
 if [ -f "requirements.txt" ]; then
-    pip install --no-cache-dir -r requirements.txt || {
-        log_message "WARNING: Some fluxgym requirements failed to install. Continuing anyway."
-    }
-else
-    log_message "WARNING: requirements.txt not found in fluxgym directory"
-fi
-
-# Double-check triton installation
-log_message "Verifying triton installation..."
-python3 -c "import triton; print(f'Triton version: {triton.__version__}')"
-python3 -c "import triton.ops; print('Triton ops module found')" || {
-    log_message "ERROR: triton.ops module not found. Attempting to fix..."
-    pip uninstall -y triton
-    pip install --no-cache-dir triton==2.1.0
-}
-
-# Add Python path for sd-scripts
-log_message "Adding sd-scripts to Python path..."
-export PYTHONPATH="$PYTHONPATH:/workspace/fluxgym/sd-scripts"
+        log_message "Installing fluxgym requirements..."
+        pip3 install --no-cache-dir -r requirements.txt || {
+            log_message "ERROR: Failed to install fluxgym requirements"
+            exit 1
+        }
+    else
+        log_message "ERROR: requirements.txt not found in fluxgym directory"
+        exit 1
+    fi
 
 # Run the handler.py
+pip3 install runpod
 log_message "Starting handler.py..."
 python3 -u handler.py
 
