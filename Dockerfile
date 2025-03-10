@@ -39,20 +39,7 @@ RUN pip3 install --no-cache-dir triton==2.1.0
 # Install bitsandbytes with compatibility for CUDA
 RUN pip3 install --no-cache-dir bitsandbytes==0.41.1
 
-# Install diffusers and other common dependencies
-RUN pip3 install --no-cache-dir \
-    diffusers==0.25.1 \
-    transformers==4.35.2 \
-    accelerate==0.25.0 \
-    safetensors==0.4.1 \
-    huggingface-hub==0.19.4 \
-    runpod \
-    pyyaml \
-    pillow \
-    python-slugify \
-    toml \
-    requests \
-    xformers
+RUN pip3 install --no-cache-dir diffusers==0.25.1 transformers==4.35.2 accelerate==0.25.0 safetensors==0.4.1 huggingface-hub>=0.20.2 runpod pyyaml pillow python-slugify toml requests xformers
 
 # Copy run script
 COPY run.sh /run.sh
