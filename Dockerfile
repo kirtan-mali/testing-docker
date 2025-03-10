@@ -8,8 +8,15 @@ RUN apt-get update && \
     python3 \
     python3-pip \
     python3-venv \
+    python3-dev \
     git \
     build-essential \
+    gcc \
+    g++ \
+    cuda-toolkit-12-2 \
+    libcudnn8 \
+    libjpeg-dev \
+    libpng-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip
@@ -18,7 +25,7 @@ RUN pip3 install --upgrade pip
 # Install PyTorch and other Python dependencies
 RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-# Copy run.sh from the repository
+
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
