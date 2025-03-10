@@ -122,6 +122,7 @@ if [ -f "requirements.txt" ]; then
 
 # Run the handler.py
 pip3 install runpod
+pip3 install --force-reinstall -v "triton==3.1.0"
 log_message "Starting handler.py..."
 python3 -u handler.py
 
