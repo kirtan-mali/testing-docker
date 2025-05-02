@@ -78,51 +78,51 @@ which python3
 python3 --version
 
 # Change to sd-scripts directory and install its requirements
-# log_message "Installing sd-scripts requirements..."
-# if [ -d "sd-scripts" ]; then
-#     cd sd-scripts || {
-#         log_message "ERROR: Could not change to sd-scripts directory"
-#         exit 1
-#     }
+log_message "Installing sd-scripts requirements..."
+if [ -d "sd-scripts" ]; then
+    cd sd-scripts || {
+        log_message "ERROR: Could not change to sd-scripts directory"
+        exit 1
+    }
     
-#     log_message "Current directory: $(pwd)"
+    log_message "Current directory: $(pwd)"
     
-#     if [ -f "requirements.txt" ]; then
-#         log_message "Installing sd-scripts requirements..."
-#         pip3 install --no-cache-dir -r requirements.txt || {
-#             log_message "ERROR: Failed to install sd-scripts requirements"
-#             exit 1
-#         }
-#     else
-#         log_message "ERROR: requirements.txt not found in sd-scripts directory"
-#         exit 1
-#     fi
+    if [ -f "requirements.txt" ]; then
+        log_message "Installing sd-scripts requirements..."
+        pip3 install --no-cache-dir -r requirements.txt || {
+            log_message "ERROR: Failed to install sd-scripts requirements"
+            exit 1
+        }
+    else
+        log_message "ERROR: requirements.txt not found in sd-scripts directory"
+        exit 1
+    fi
     
-#     # Return to fluxgym directory
-#     cd .. || {
-#         log_message "ERROR: Could not return to fluxgym directory"
-#         exit 1
-#     }
-# else
-#     log_message "ERROR: sd-scripts directory not found"
-#     exit 1
-# fi
-# 
-# log_message "Installing fluxgym requirements..."
-# if [ -f "requirements.txt" ]; then
-#         log_message "Installing fluxgym requirements..."
-#         pip3 install --no-cache-dir -r requirements.txt || {
-#             log_message "ERROR: Failed to install fluxgym requirements"
-#             exit 1
-#         }
-#     else
-#         log_message "ERROR: requirements.txt not found in fluxgym directory"
-#         exit 1
-#     fi
+    # Return to fluxgym directory
+    cd .. || {
+        log_message "ERROR: Could not return to fluxgym directory"
+        exit 1
+    }
+else
+    log_message "ERROR: sd-scripts directory not found"
+    exit 1
+fi
+
+log_message "Installing fluxgym requirements..."
+if [ -f "requirements.txt" ]; then
+        log_message "Installing fluxgym requirements..."
+        pip3 install --no-cache-dir -r requirements.txt || {
+            log_message "ERROR: Failed to install fluxgym requirements"
+            exit 1
+        }
+    else
+        log_message "ERROR: requirements.txt not found in fluxgym directory"
+        exit 1
+    fi
 
 # Run the handler.py
-# pip3 install runpod
-# pip3 install --force-reinstall -v "triton==3.1.0"
+pip3 install runpod
+pip3 install --force-reinstall -v "triton==3.1.0"
 log_message "Starting handler.py..."
 python3 -u handler.py
 
