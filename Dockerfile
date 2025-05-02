@@ -26,7 +26,7 @@ RUN apt-get update && \
 RUN pip3 install --upgrade pip
 
 # Install PyTorch and related libraries with specific versions 
-RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
 
 # Copy run script
